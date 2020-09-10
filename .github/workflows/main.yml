@@ -1,0 +1,46 @@
+name: Main
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      #- name: Bootstrap env
+      #  run: ${GITHUB_WORKSPACE}/tools/bin/_bootstrap_env
+
+      #- name: Set env
+      #run: echo "::add-path::${GITHUB_WORKSPACE}/.conda/bin"
+
+      # Store bazel cache with build/test results.
+      #- name: Mount bazel cache
+      #  uses: actions/cache@v2.1.1
+      #  with:
+      #    path: "/home/runner/.cache/bazel"
+      #    key: bazel
+
+      #- name: bazel test
+      #  run: bazel test //...
+  autosquash:
+    needs: test
+    runs-on: ubuntu-18.04
+
+    steps:
+      # May also consider: https://github.com/pascalgn/automerge-action
+      - uses: asford/autosquash@v2.2
+        with:
+          # We can't use the built-in secrets.GITHUB_TOKEN yet because of this limitation:
+          # https://github.community/t5/GitHub-Actions/Triggering-a-new-workflow-from-another-workflow/td-p/31676
+          # In the meantime, use a token granting write access on the repo:
+          # - a GitHub App token
+          #   See https://github.com/marketplace/actions/github-app-token.
+          # - a personal access token
+          #   See https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line.
+          github_token: ${{ secrets.AUTOSQUASH_TOKEN }}
